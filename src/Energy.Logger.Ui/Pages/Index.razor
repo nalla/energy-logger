@@ -1,0 +1,69 @@
+@page "/"
+@using Energy.Logger.Shared.Models
+@inject HttpClient Http
+
+<EditForm Model="@measurement" OnValidSubmit="@HandleValidSubmitAsync">
+    <div class="row">
+        <div class="label"><span class="material-icons">water_drop</span></div>
+        <div class="input"><InputNumber id="water" @bind-Value="measurement.Water" /></div>
+    </div>
+
+    <div class="row">
+        <div class="label"><span class="material-icons">bolt</span></div>
+        <div class="input"><InputNumber id="electricity" @bind-Value="measurement.Electricity" /></div>
+    </div>
+
+    <div class="row">
+        <div class="label"><span class="material-icons">local_gas_station</span></div>
+        <div class="input"><InputNumber id="gas" @bind-Value="measurement.Gas" /></div>
+    </div>
+
+    <div class="row">
+        <div class="label"><span class="material-icons">event</span></div>
+        <div class="input"><InputDate id="date" @bind-Value="measurement.Timestamp" /></div>
+    </div>
+
+    <div class="row">
+        <div class="label"><span class="material-icons">vpn_key</span></div>
+        <div class="input"><InputText id="apikey" @bind-Value="measurement.ApiKey" /></div>
+    </div>
+
+    <div class="row">
+        <div class="label"><span class="material-icons">save</span></div>
+        <div class="input"><button type="submit">Submit</button></div>
+    </div>
+
+    <div class="row">
+        <div class="label"><span class="material-icons">info</span></div>
+        <div class="input">@lastResult</div>
+    </div>
+
+    <DataAnnotationsValidator />
+
+</EditForm>
+
+@code {
+    private MeasurementDto measurement = new();
+    private string lastResult = string.Empty;
+
+    protected override Task OnInitializedAsync()
+    {
+      measurement.Timestamp = DateTime.Now;
+
+      return Task.CompletedTask;
+    }
+
+    private async Task HandleValidSubmitAsync()
+    {
+      var response = await Http.PostAsJsonAsync( "api/measurements", measurement );
+
+      if (response.IsSuccessStatusCode)
+      {
+        lastResult = "OK";
+      }
+      else
+      {
+        lastResult = "ERROR";
+      }
+    }
+}
